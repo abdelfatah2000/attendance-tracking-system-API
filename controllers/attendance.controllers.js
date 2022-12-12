@@ -1,7 +1,7 @@
 const Attendance = require("../models/attendance.model");
 const { StatusCodes } = require("http-status-codes");
 
-const clockIn = async (req, res, next) => {
+const clockIn = async (req, res) => {
   try {
     const attendance = new Attendance({
       user: req.user.id,
@@ -18,7 +18,7 @@ const clockIn = async (req, res, next) => {
   }
 };
 
-const clockOut = async (req, res, next) => {
+const clockOut = async (req, res) => {
   try {
     const now = new Date();
     const today = new Date(now.toISOString().split("T")[0]);
@@ -27,9 +27,10 @@ const clockOut = async (req, res, next) => {
       check_in: { $gte: today },
     });
     attendance.check_out = now;
-    attendance.working_hour = Math.floor(
-      (attendance.check_in - now) / (1000 * 60 * 60)
+    attendance.working_hour = Math.abs(
+      Math.floor((attendance.check_in - now) / (1000 * 60 * 60))
     );
+    console.log((attendance.check_in - now) / (1000 * 60 * 60));
     await attendance.save();
     res.status(StatusCodes.CREATED).json({ message: "Clocked Out" });
   } catch (error) {

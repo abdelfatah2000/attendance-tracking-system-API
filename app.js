@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const connection = require("./config/db");
 const Attendance = require("./models/attendance.model");
+const User = require("./models/user.model");
 const cron = require("node-cron");
 require("dotenv").config();
 
@@ -11,23 +12,30 @@ app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
 const route = require("./routes/user.routes");
+const attendanceRoute = require("./routes/attendance.routes");
+const requestRoute = require("./routes/leavingRequests.routes");
 app.use(route);
+app.use(attendanceRoute);
+app.use(requestRoute);
 
-cron.schedule("0 23 * * *", async () => {
+cron.schedule("15 22 * * *", async () => {
+  const user = await User.find({ role: "Employee" }).select("_id department");
   const today = new Date().toISOString().split("T")[0];
-  const attendance = await Attendance.find({
-    user: req.user.id,
-    department: req.user.department,
-    check_in: { $gte: today },
-    check_out: { $lte: new Date(today + "T23:00:00.000Z") },
-  });
-  if (!attendance) {
-    const newAttendance = new Attendance({
-      user: req.user.id,
-      department: req.user.department,
-      present: false,
+  for (let id of user) {
+    const attendance = await Attendance.find({
+      user: id._id,
+      check_in: { $gte: today },
+      check_out: { $lte: new Date(today + "T23:00:00.000Z") },
     });
-    await newAttendance.save();
+    console.log(attendance);
+    if (attendance.length < 1) {
+      const newAttendance = new Attendance({
+        user: id._id,
+        department: id.department,
+        present: false,
+      });
+      await newAttendance.save();
+    }
   }
 });
 

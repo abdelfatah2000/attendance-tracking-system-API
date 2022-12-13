@@ -6,18 +6,31 @@ const jwt = require("jsonwebtoken");
 
 //registeraion
 const register = async (req, res) => {
-  const { username, email, phone, password } = req.body;
-  bcrypt.hash(password, Number(process.env.SALTROUNDS), async (err, hash) => {
-    await User.insertMany({
-      username: `${username}`,
-      email: `${email}`,
-      phone: `${phone}`,
-      password: `${hash}`,
-      role: "Employee",
-    })
-      .then((da) => res.status(StatusCodes.CREATED).send("done!!"))
-      .catch((err) => res.status(StatusCodes.BAD_REQUEST).send(err));
-  });
+  try {
+    const { username, email, phone, password, department } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "This Email is already used" });
+    } else {
+      const userData = new User({
+        username: username,
+        email,
+        password,
+        phone,
+        role: "Employee",
+        department: department,
+      });
+      await userData.save();
+      res.status(StatusCodes.CREATED).json({ message: "Done" });
+    }
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Your request could not be processed. Please try again.",
+      error,
+    });
+  }
 };
 //update user data
 const updateUser = async (req, res) => {

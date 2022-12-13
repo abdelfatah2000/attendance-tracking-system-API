@@ -14,6 +14,9 @@ app.use(express.urlencoded({ extended: true }));
 const route = require("./routes/user.routes");
 const attendanceRoute = require("./routes/attendance.routes");
 const requestRoute = require("./routes/leavingRequests.routes");
+const departmentRoute = require("./routes/department.routes");
+
+app.use(departmentRoute);
 app.use(route);
 app.use(attendanceRoute);
 app.use(requestRoute);

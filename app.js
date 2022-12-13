@@ -18,7 +18,7 @@ app.use(route);
 app.use(attendanceRoute);
 app.use(requestRoute);
 
-cron.schedule("15 22 * * *", async () => {
+cron.schedule("59 23 * * *", async () => {
   const user = await User.find({ role: "Employee" }).select("_id department");
   const today = new Date().toISOString().split("T")[0];
   for (let id of user) {

@@ -13,6 +13,7 @@ const register = async (req, res) => {
       email: `${email}`,
       phone: `${phone}`,
       password: `${hash}`,
+      role: "Employee",
     })
       .then((da) => res.status(StatusCodes.CREATED).send("done!!"))
       .catch((err) => res.status(StatusCodes.BAD_REQUEST).send(err));
@@ -62,10 +63,11 @@ const loginUser = async (req, res) => {
 };
 //checkin
 
-
 const getUser = async (req, res, next) => {
   try {
-    const userData = await User.findOne({ _id: req.user._id }).select("username email phone");
+    const userData = await User.findOne({ _id: req.user._id }).select(
+      "username email phone"
+    );
     res.status(StatusCodes.OK).json({ userData });
   } catch (error) {
     res
@@ -74,5 +76,4 @@ const getUser = async (req, res, next) => {
   }
 };
 
-
-module.exports = { register, updateUser, loginUser,  getUser };
+module.exports = { register, updateUser, loginUser, getUser };

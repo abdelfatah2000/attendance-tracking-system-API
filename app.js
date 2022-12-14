@@ -4,10 +4,12 @@ const connection = require("./config/db");
 const Attendance = require("./models/attendance.model");
 const User = require("./models/user.model");
 const cron = require("node-cron");
+const logger = require('morgan')
 require("dotenv").config();
 
 connection();
 
+app.use(logger('dev'));
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 

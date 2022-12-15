@@ -10,12 +10,10 @@ const clockIn = async (req, res) => {
       present: true,
     });
     await attendance.save();
-    res
-      .status(StatusCodes.CREATED)
-      .json({
-        message: "Clocked In",
-        clock_in: new Date().toISOString().split("T")[1],
-      });
+    res.status(StatusCodes.CREATED).json({
+      message: "Clocked In",
+      clock_in: new Date().toISOString().split("T")[1],
+    });
   } catch (error) {
     res
       .status(StatusCodes.BAD_REQUEST)
@@ -31,9 +29,7 @@ const clockOut = async (req, res) => {
       user: req.user.id,
       check_in: { $gte: today },
     });
-    const total = Math.abs(
-      Math.floor((attendance.check_in - now) / (1000 * 60 * 60))
-    );
+    const total = Math.abs((attendance.check_in - now) / (1000 * 60 * 60));
     attendance.check_out = now;
     attendance.working_hour = total;
     await attendance.save();

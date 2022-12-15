@@ -4,12 +4,12 @@ const connection = require("./config/db");
 const Attendance = require("./models/attendance.model");
 const User = require("./models/user.model");
 const cron = require("node-cron");
-const logger = require('morgan')
+const logger = require("morgan");
 require("dotenv").config();
 
 connection();
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,16 +23,15 @@ app.use(route);
 app.use(attendanceRoute);
 app.use(requestRoute);
 
-cron.schedule("59 23 * * *", async () => {
+cron.schedule("59 23 * * * *", async () => {
   const user = await User.find({ role: "Employee" }).select("_id department");
   const today = new Date().toISOString().split("T")[0];
   for (let id of user) {
-    const attendance = await Attendance.find({
+    const attendance = await Attendance.findOne({
       user: id._id,
       check_in: { $gte: today },
       check_out: { $lte: new Date(today + "T23:00:00.000Z") },
     });
-    console.log(attendance);
     if (attendance.length < 1) {
       const newAttendance = new Attendance({
         user: id._id,
@@ -40,6 +39,11 @@ cron.schedule("59 23 * * *", async () => {
         present: false,
       });
       await newAttendance.save();
+    } else {
+      if (attendance.working_hour < 2) {
+        attendance.present = false;
+        await attendance.save();
+      }
     }
   }
 });
